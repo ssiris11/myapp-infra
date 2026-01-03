@@ -30,3 +30,8 @@ variable "target_port" {
   type    = number
   default = 8080
 }
+
+variable "acr_id" {
+  type        = string
+  description = "ACR resource ID"
+}

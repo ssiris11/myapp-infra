@@ -23,6 +23,7 @@ module "container_app" {
   resource_group_name = module.rg.name
   cae_id              = module.cae.id
   image               = var.container_image
+  acr_id              = module.acr.id
 }
 
 module "storage" {

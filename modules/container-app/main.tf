@@ -6,7 +6,9 @@ resource "azurerm_container_app" "this" {
   resource_group_name          = var.resource_group_name
   container_app_environment_id = var.cae_id
   revision_mode                = "Single"
-
+  identity {
+    type = "SystemAssigned"
+  }
   template {
     container {
       name   = "app"
@@ -26,4 +28,11 @@ resource "azurerm_container_app" "this" {
     }
   }
 }
+
+resource "azurerm_role_assignment" "acrpull" {
+  scope                = var.acr_id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_container_app.this.identity[0].principal_id
+}
+
 
