@@ -1,0 +1,54 @@
+name: CD - Terraform Apply (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment"
+        type: choice
+        options: [dev, uat, prod]
+        required: true
+      container_image:
+        description: "Full image ref (e.g. bbapp.azurecr.io/python-app:<sha>)"
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform_apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            -var-file="env/${{ inputs.environment }}.tfvars" \
+            -var="container_image=${{ inputs.container_image }}"
+
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+            -var-file="env/${{ inputs.environment }}.tfvars" \
+            -var="container_image=${{ inputs.container_image }}" \
+            -var="sql_admin_username=${{ secrets.SQL_ADMIN_USERNAME }}" \
+            -var="sql_admin_password=${{ secrets.SQL_ADMIN_PASSWORD }}" 
