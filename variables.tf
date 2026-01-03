@@ -23,3 +23,16 @@ variable "sql_admin_password" {
   sensitive   = true
   description = "SQL admin password"
 }
+
+variable "subscription_id" {
+  type = string
+}
+
+variable "tenant_id" {
+  type = string
+}
+
+variable "client_id" {
+  type = string
+}
+
